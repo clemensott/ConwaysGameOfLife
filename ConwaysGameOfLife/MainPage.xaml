@@ -1,0 +1,73 @@
+﻿<Page
+    x:Class="ConwaysGameOfLife.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ConwaysGameOfLife"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer HorizontalScrollMode="Auto" VerticalScrollMode="Disabled"
+                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="btnStartStop" Content="Start" Click="BtnStartStop_Click" Margin="10"/>
+                    <Button Content="Step" Click="BtnStep_Click" Margin="10"/>
+                    <Button Content="Clear" Click="BtnClear_Click" Margin="10"/>
+                    <Button Content="Load" Click="BtnLoad_Click" Margin="10"/>
+                    <Button Content="Save" Click="BtnSave_Click" Margin="10"/>
+                    <Button Content="Random" Click="BtnRandom_Click" Margin="10"/>
+                </StackPanel>
+
+                <Grid Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Slider Grid.Column="0" Grid.Row="0" Minimum="1" x:Name="sldTimer" Maximum="70" Value="10" 
+                            Width="100" Margin="10,10,10,-10" ValueChanged="SldTimer_ValueChanged"/>
+                    <Slider Grid.Column="1" Grid.Row="0" Minimum="10" x:Name="sldColumns" Maximum="200" Value="100"
+                            Width="100" Margin="10,10,10,-10" ValueChanged="SldColumns_ValueChanged"/>
+                    <Slider Grid.Column="2" Grid.Row="0" Minimum="10" x:Name="sldRows" Maximum="200" Value="100" 
+                            Width="100" Margin="10,10,10,-10" ValueChanged="SldRows_ValueChanged"/>
+
+                    <TextBlock Grid.Column="0" Grid.Row="1" Text="Timer [Hz]" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Grid.Row="1" Text="Columns" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Grid.Row="1" Text="Rows" HorizontalAlignment="Center"/>
+
+                    <StackPanel Grid.Column="3" Grid.RowSpan="2">
+                        <CheckBox Content="Show Grid" Checked="UpdateView" Unchecked="UpdateView"
+                                  IsChecked="{Binding ShowGrid,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                        <CheckBox Content="With Cellmargin"  Checked="UpdateView" Unchecked="UpdateView"
+                                  IsChecked="{Binding WithCellMargin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <canvas:CanvasControl Grid.Row="1" x:Name="ccDraw" Draw="ccDraw_Draw"/>
+
+        <ScrollViewer Grid.Row="1" x:Name="slvGrid" HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled"
+                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MinZoomFactor="1"
+                      ZoomMode="Enabled" SizeChanged="slvGrid_SizeChanged" ViewChanging="slvGrid_ViewChanging" 
+                      Tapped="ccEmpty_Tapped" DirectManipulationStarted="slvGrid_DirectManipulationStarted"
+                      DirectManipulationCompleted="slvGrid_DirectManipulationCompleted">
+            <canvas:CanvasControl x:Name="ccEmpty" ClearColor="Transparent"/>
+        </ScrollViewer>
+    </Grid>
+</Page>
