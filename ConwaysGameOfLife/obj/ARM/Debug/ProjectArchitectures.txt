@@ -1,1 +1,0 @@
-D:\Projects\Eigentlich Fertig\ConwaysGameOfLife\ConwaysGameOfLife\ConwaysGameOfLife.csproj;arm

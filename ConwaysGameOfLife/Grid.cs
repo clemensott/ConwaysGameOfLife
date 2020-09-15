@@ -1,6 +1,5 @@
 ﻿using Microsoft.Graphics.Canvas;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace ConwaysGameOfLife
         private Size slvGridSize;
 
         private int nextGenRowsTmp;
-        private Action<int> setNextCellGeneration;
+        private readonly Action<int> setNextCellGeneration;
 
         public bool ShowGrid
         {
@@ -278,7 +277,7 @@ namespace ConwaysGameOfLife
             return !(x < 0 || y < 0 || x > slvGridSize.Width || y > slvGridSize.Height);
         }
 
-        public async void Save()
+        public async Task Save()
         {
             string output = "";
 

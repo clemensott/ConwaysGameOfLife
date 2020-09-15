@@ -1,19 +1,11 @@
-﻿using Microsoft.Graphics.Canvas;
-using Microsoft.Graphics.Canvas.UI.Xaml;
+﻿using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using System.Threading.Tasks;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // Die Vorlage "Leere Seite" ist unter http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409 dokumentiert.
 
@@ -24,7 +16,7 @@ namespace ConwaysGameOfLife
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private const string start = "Start", stop = "Stop";
+        private const string start = "Start", pause = "Pause";
 
         private volatile bool isUpdatingAnyway;
         private Grid grid;
@@ -44,12 +36,17 @@ namespace ConwaysGameOfLife
             this.InitializeComponent();
 
             DataContext = grid;
+
+            abbPlayPause.Label = start;
+            abbPlayPause.Icon = new SymbolIcon(Symbol.Play);
         }
 
-        private void BtnStartStop_Click(object sender, RoutedEventArgs e)
+        private async void AbbPlayPause_Click(object sender, RoutedEventArgs e)
         {
-            if (btnStartStop.Content as string == start) EnableTimer();
-            else DisableTimer();
+            AppBarButton abb = (AppBarButton)sender;
+
+            if (abb.Label == start) EnableTimer();
+            else await DisableTimer();
         }
 
         private void EnableTimer()
@@ -59,37 +56,39 @@ namespace ConwaysGameOfLife
             sw.Start();
 
             timer.Start();
-            btnStartStop.Content = stop;
+            abbPlayPause.Label = pause;
+            abbPlayPause.Icon = new SymbolIcon(Symbol.Pause);
         }
 
-        private void DisableTimer()
+        private async Task DisableTimer()
         {
             sw.Stop();
 
             timer.Stop();
-            btnStartStop.Content = start;
+            abbPlayPause.Label = start;
+            abbPlayPause.Icon = new SymbolIcon(Symbol.Play);
 
             string message = string.Format("Count: {0,4}; Time: {1}\nAvg: {2} Gen/s",
                 genCount, sw.Elapsed.TotalSeconds, genCount / sw.Elapsed.TotalSeconds);
-            new Windows.UI.Popups.MessageDialog(message).ShowAsync();
+            await new Windows.UI.Popups.MessageDialog(message).ShowAsync();
         }
 
-        private void BtnStep_Click(object sender, RoutedEventArgs e)
+        private void AbbNextStep_Click(object sender, RoutedEventArgs e)
         {
             timer.Stop();
-            btnStartStop.Content = start;
+            abbPlayPause.Label = start;
 
             grid.SetNextGeneration();
             ccDraw.Invalidate();
         }
 
-        private void BtnClear_Click(object sender, RoutedEventArgs e)
+        private void AbbClear_Click(object sender, RoutedEventArgs e)
         {
             grid.Clear();
             ccDraw.Invalidate();
         }
 
-        private async void BtnLoad_Click(object sender, RoutedEventArgs e)
+        private async void AbbLoad_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -101,21 +100,22 @@ namespace ConwaysGameOfLife
                 ccDraw.Width = slvGrid.ActualWidth;
                 ccDraw.Height = slvGrid.ActualHeight;
 
-                slvGrid.ZoomToFactor(1);
-                slvGrid.ScrollToHorizontalOffset(0);
-                slvGrid.ScrollToVerticalOffset(0);
+                sldColumns.Value = grid.Columns;
+                sldRows.Value = grid.Rows;
+
+                slvGrid.ChangeView(0, 0, 1);
 
                 ccDraw.Invalidate();
             }
             catch { }
         }
 
-        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        private async void AbbSave_Click(object sender, RoutedEventArgs e)
         {
-            grid.Save();
+            await grid.Save();
         }
 
-        private void ccDraw_Draw(CanvasControl sender, CanvasDrawEventArgs args)
+        private void CcDraw_Draw(CanvasControl sender, CanvasDrawEventArgs args)
         {
             grid.Draw(args.DrawingSession);
         }
@@ -149,14 +149,14 @@ namespace ConwaysGameOfLife
             if (!isUpdatingAnyway) ccDraw.Invalidate();
         }
 
-        private void ccEmpty_Tapped(object sender, TappedRoutedEventArgs e)
+        private void CcEmpty_Tapped(object sender, TappedRoutedEventArgs e)
         {
             grid.Toggle(e.GetPosition(sender as UIElement));
 
             ccDraw.Invalidate();
         }
 
-        private void slvGrid_ViewChanging(object sender, ScrollViewerViewChangingEventArgs e)
+        private void SlvGrid_ViewChanging(object sender, ScrollViewerViewChangingEventArgs e)
         {
             grid.SetOffsetsAndZoom(e.NextView.HorizontalOffset,
                 e.NextView.VerticalOffset, e.NextView.ZoomFactor);
@@ -164,42 +164,18 @@ namespace ConwaysGameOfLife
             ccDraw.Invalidate();
         }
 
-        private void CbxShowGrid_Checked(object sender, RoutedEventArgs e)
-        {
-            grid.ShowGrid = true;
-            ccDraw.Invalidate();
-        }
-
-        private void CbxShowGrid_Unchecked(object sender, RoutedEventArgs e)
-        {
-            grid.ShowGrid = false;
-            ccDraw.Invalidate();
-        }
-
-        private void CbxWithCellMargin_Checked(object sender, RoutedEventArgs e)
-        {
-            grid.WithCellMargin = true;
-            ccDraw.Invalidate();
-        }
-
-        private void CbxWithCellMargin_Unchecked(object sender, RoutedEventArgs e)
-        {
-            grid.WithCellMargin = false;
-            ccDraw.Invalidate();
-        }
-
-        private void BtnRandom_Click(object sender, RoutedEventArgs e)
+        private void AbbRandom_Click(object sender, RoutedEventArgs e)
         {
             grid.SetCellsRandom();
             ccDraw.Invalidate();
         }
 
-        private void slvGrid_DirectManipulationStarted(object sender, object e)
+        private void SlvGrid_DirectManipulationStarted(object sender, object e)
         {
             isUpdatingAnyway = true;
         }
 
-        private void slvGrid_DirectManipulationCompleted(object sender, object e)
+        private void SlvGrid_DirectManipulationCompleted(object sender, object e)
         {
             isUpdatingAnyway = false;
         }
@@ -209,7 +185,19 @@ namespace ConwaysGameOfLife
             ccDraw.Invalidate();
         }
 
-        private void slvGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void AbbFullscreen_Checked(object sender, RoutedEventArgs e)
+        {
+            ApplicationView.GetForCurrentView().TryEnterFullScreenMode();
+            gidSliders.Visibility = Visibility.Collapsed;
+        }
+
+        private void AbbFullscreen_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ApplicationView.GetForCurrentView().ExitFullScreenMode();
+            gidSliders.Visibility = Visibility.Visible;
+        }
+
+        private void SlvGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             grid.SetCellSize(e.NewSize);
 

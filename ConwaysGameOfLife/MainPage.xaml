@@ -14,60 +14,66 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer HorizontalScrollMode="Auto" VerticalScrollMode="Disabled"
-                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btnStartStop" Content="Start" Click="BtnStartStop_Click" Margin="10"/>
-                    <Button Content="Step" Click="BtnStep_Click" Margin="10"/>
-                    <Button Content="Clear" Click="BtnClear_Click" Margin="10"/>
-                    <Button Content="Load" Click="BtnLoad_Click" Margin="10"/>
-                    <Button Content="Save" Click="BtnSave_Click" Margin="10"/>
-                    <Button Content="Random" Click="BtnRandom_Click" Margin="10"/>
-                </StackPanel>
+        <Grid Name="gidSliders" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                <Grid Margin="0,0,0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+            <Slider Grid.Column="0" Grid.Row="0" Minimum="1" x:Name="sldTimer" Maximum="70" Value="10" 
+                    Margin="10,10,10,-10" ValueChanged="SldTimer_ValueChanged"/>
+            <TextBlock Grid.Column="0" Grid.Row="1" Text="Timer [Hz]" HorizontalAlignment="Center"/>
 
-                    <Slider Grid.Column="0" Grid.Row="0" Minimum="1" x:Name="sldTimer" Maximum="70" Value="10" 
-                            Width="100" Margin="10,10,10,-10" ValueChanged="SldTimer_ValueChanged"/>
-                    <Slider Grid.Column="1" Grid.Row="0" Minimum="10" x:Name="sldColumns" Maximum="200" Value="100"
-                            Width="100" Margin="10,10,10,-10" ValueChanged="SldColumns_ValueChanged"/>
-                    <Slider Grid.Column="2" Grid.Row="0" Minimum="10" x:Name="sldRows" Maximum="200" Value="100" 
-                            Width="100" Margin="10,10,10,-10" ValueChanged="SldRows_ValueChanged"/>
+            <Slider Grid.Column="1" Grid.Row="0" Minimum="10" x:Name="sldColumns" Maximum="200" Value="100"
+                    Margin="10,10,10,-10" ValueChanged="SldColumns_ValueChanged"/>
+            <TextBlock Grid.Column="1" Grid.Row="1" Text="Columns" HorizontalAlignment="Center"/>
 
-                    <TextBlock Grid.Column="0" Grid.Row="1" Text="Timer [Hz]" HorizontalAlignment="Center"/>
-                    <TextBlock Grid.Column="1" Grid.Row="1" Text="Columns" HorizontalAlignment="Center"/>
-                    <TextBlock Grid.Column="2" Grid.Row="1" Text="Rows" HorizontalAlignment="Center"/>
+            <Slider Grid.Column="2" Grid.Row="0" Minimum="10" x:Name="sldRows" Maximum="200" Value="100" 
+                    Margin="10,10,10,-10" ValueChanged="SldRows_ValueChanged"/>
+            <TextBlock Grid.Column="2" Grid.Row="1" Text="Rows" HorizontalAlignment="Center"/>
+        </Grid>
 
-                    <StackPanel Grid.Column="3" Grid.RowSpan="2">
-                        <CheckBox Content="Show Grid" Checked="UpdateView" Unchecked="UpdateView"
-                                  IsChecked="{Binding ShowGrid,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
-                        <CheckBox Content="With Cellmargin"  Checked="UpdateView" Unchecked="UpdateView"
-                                  IsChecked="{Binding WithCellMargin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-        </ScrollViewer>
+        <Grid Grid.Row="1" Name="gidGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <canvas:CanvasControl x:Name="ccDraw" Draw="CcDraw_Draw"/>
 
-        <canvas:CanvasControl Grid.Row="1" x:Name="ccDraw" Draw="ccDraw_Draw"/>
-
-        <ScrollViewer Grid.Row="1" x:Name="slvGrid" HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled"
-                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MinZoomFactor="1"
-                      ZoomMode="Enabled" SizeChanged="slvGrid_SizeChanged" ViewChanging="slvGrid_ViewChanging" 
-                      Tapped="ccEmpty_Tapped" DirectManipulationStarted="slvGrid_DirectManipulationStarted"
-                      DirectManipulationCompleted="slvGrid_DirectManipulationCompleted">
-            <canvas:CanvasControl x:Name="ccEmpty" ClearColor="Transparent"/>
-        </ScrollViewer>
+            <ScrollViewer Grid.Row="1" x:Name="slvGrid" HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled"
+                          VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                          HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MinZoomFactor="1"
+                          ZoomMode="Enabled" SizeChanged="SlvGrid_SizeChanged" ViewChanging="SlvGrid_ViewChanging" 
+                          Tapped="CcEmpty_Tapped" DirectManipulationStarted="SlvGrid_DirectManipulationStarted"
+                          DirectManipulationCompleted="SlvGrid_DirectManipulationCompleted">
+                <canvas:CanvasControl x:Name="ccEmpty" ClearColor="Transparent"/>
+            </ScrollViewer>
+        </Grid>
     </Grid>
+
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton Name="abbPlayPause" Label="Play" Icon="Play" Click="AbbPlayPause_Click"/>
+                <AppBarButton Label="Next Step" Icon="Next" Click="AbbNextStep_Click"/>
+                <AppBarToggleButton Label="Fullscreen" Icon="FullScreen" 
+                                    Checked="AbbFullscreen_Checked" Unchecked="AbbFullscreen_Unchecked"/>
+            </CommandBar.PrimaryCommands>
+
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="Random" Icon="Shuffle" Click="AbbRandom_Click"/>
+                <AppBarButton Label="Clear" Icon="Clear" Click="AbbClear_Click"/>
+                <AppBarSeparator />
+                <AppBarToggleButton Label="Show Grid" Icon="ViewAll" Checked="UpdateView" Unchecked="UpdateView"
+                                    IsChecked="{Binding ShowGrid,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                <AppBarToggleButton Label="Cell margin" Icon="SelectAll" Checked="UpdateView" Unchecked="UpdateView"
+                                    IsChecked="{Binding WithCellMargin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                <AppBarSeparator />
+                <AppBarButton Label="Save" Icon="Save" Click="AbbSave_Click"/>
+                <AppBarButton Label="Load" Icon="OpenFile" Click="AbbLoad_Click"/>
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
 </Page>
